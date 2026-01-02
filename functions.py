@@ -5,6 +5,10 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import norm
+import math
+
+
+# TODO: prepare docs in readable format
 
 def historical_volatility(ts, if_returns=False, if_alternative_approach=False):
     """
@@ -56,8 +60,26 @@ def eq_option_pricing_binomial_tree(s0, K, T, r, sigma, N):
         
     return V[0], s_tree
 
+def bsm_option_price(s0, K, T, r, sigma, type='call'):
+    # TODO: notebook with deeper understading of BSM formula, e.g. how to interpret d1 and d2, how price changes with manipulation of input
+
+    d1 = (np.log(s0/K) + (r + sigma**2/2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    
+    if type == 'call':
+        # price = np.exp(-r*T) * s0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+        price = s0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    else:
+        # price = np.exp(-r*T) * K * norm.cdf(-d2) - s0 * norm.cdf(-d1)
+        price = np.exp(-r * T) * K * norm.cdf(-d2) - s0 * norm.cdf(-d1)
+        
+    return price, d1, d2
+
+def binomial_coefficient(n, k):
+    return math.factorial(n) / (math.factorial(k) * math.factorial(n-k))
+
 def main():
-    return None
+    pass
 
 
 if __name__ == '__main__':
