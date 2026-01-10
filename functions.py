@@ -30,6 +30,32 @@ def historical_volatility(ts, if_returns=False, if_alternative_approach=False):
                 
     return vol
 
+def generate_gbm_paths(s0, T, r, sigma, time_steps_num, path_num, normal_dist_vars=None):
+
+    dt = T / time_steps_num
+    if normal_dist_vars is None:
+        normal_dist_vars = np.random.normal(0, 1, (path_num, time_steps_num))
+    
+    paths = np.zeros((path_num, time_steps_num + 1))
+    paths[:, 0] = s0
+
+    for i in range(1, time_steps_num + 1):
+        paths[:, i] = paths[:, i - 1] + paths[:, i - 1] * r * dt + sigma * paths[:, i - 1] * np.sqrt(dt) * normal_dist_vars[:, i - 1]
+        
+    return paths.T
+
+def generate_money_market_numeraire_paths(T, r, time_steps_num, path_num):
+
+    dt = T / time_steps_num
+    paths = np.zeros((path_num, time_steps_num + 1))
+    paths[:, 0] = 1
+
+    for i in range(1, int(time_steps_num) + 1):
+        paths[:, i] = paths[:, i - 1] * (1 + r * dt)  # dg = r*g*dt   ->   g_t+1 - g_t = r*g_t*dt   ->   g_t+1 = g_t + r*g_t*dt   ->   g_t+1 = (1+r*dt) * g_t
+    
+    return paths.T
+
+
 def eq_option_pricing_binomial_tree(s0, K, T, r, sigma, N):
     """Function utilized in binomial tree option pricing
 
