@@ -86,18 +86,16 @@ def eq_option_pricing_binomial_tree(s0, K, T, r, sigma, N):
         
     return V[0], s_tree
 
-def bsm_option_price(s0, K, T, r, sigma, type='call'):
-    # TODO: notebook with deeper understading of BSM formula, e.g. how to interpret d1 and d2, how price changes with manipulation of input
+def bsm_option_price(s0, K, T, r, sigma, q=0.0, type='call'):
+    # q - dividend yield, when stock does not pay dividend then q=0.0
 
-    d1 = (np.log(s0/K) + (r + sigma**2/2) * T) / (sigma * np.sqrt(T))
+    d1 = (np.log(s0/K) + (r - q + sigma**2/2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
     
     if type == 'call':
-        # price = np.exp(-r*T) * s0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
-        price = s0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+        price = s0 * np.exp(-q*T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
     else:
-        # price = np.exp(-r*T) * K * norm.cdf(-d2) - s0 * norm.cdf(-d1)
-        price = np.exp(-r * T) * K * norm.cdf(-d2) - s0 * norm.cdf(-d1)
+        price = np.exp(-r * T) * K * norm.cdf(-d2) - s0 * np.exp(-q*T) * norm.cdf(-d1)
         
     return price, d1, d2
 
